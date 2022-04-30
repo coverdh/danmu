@@ -3,13 +3,59 @@
  */
 package com.cover.danmu
 
-class App {
-    val greeting: String
-        get() {
-            return "Hello World!"
-        }
-}
+import com.alibaba.fastjson.JSON
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.utils.io.core.*
+import io.ktor.utils.io.streams.*
+import kotlinx.coroutines.runBlocking
+import java.io.File
+import kotlin.text.toByteArray
+
 
 fun main() {
-    println(App().greeting)
+    val httpClient = HttpClient(CIO)
+    val danmu = TencentVideo(httpClient)
+    runBlocking {
+        val min = 1
+        val max = 1
+        val episodeList = danmu.getEpisodeList("mzc00200v3lnbmd")
+        val getDanmuEpList = episodeList.filter {
+            val epIdx = try {
+                it.ep.toInt()
+            } catch (e: NumberFormatException) {
+                it.ep.filter { it in '0'..'9' }.toString().toInt()
+            }
+            epIdx in min..max
+        }
+        getDanmuEpList.forEach {
+            val fileName = "Who.Rules.The.World.2022.S01.EP${it.ep}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.xml"
+            val file = File("build/" + fileName)
+            val danmuList = danmu.getDanmuList(it)
+            val output = file.outputStream().asOutput()
+            output.writeText(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<i>\n" +
+                        "  <chatserver>chat.bilibili.tv</chatserver>\n" +
+                        "  <chatid>91236</chatid>\n" +
+                        "  <source>k-v</source>\n"
+            )
+            danmuList.forEach { item ->
+                val time = item.time
+                val fontSize = 12
+                val mode = 0
+                val color = item.style["color"]
+                val date = ""
+                val poolId = 0
+                val authorId = 0
+                val dbId = 0
+                val content = item.content
+                output.writeText("\t<d p=\"$time,$mode,$fontSize,$color,$date,$poolId,$authorId,$dbId\">$content</d>\n")
+            }
+            output.writeText("</i>")
+            output.flush()
+            output.close()
+        }
+
+    }
 }

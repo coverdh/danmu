@@ -31,6 +31,8 @@ dependencies {
 
     implementation("io.ktor:ktor-client-cio:$ktor_version")
 
+    implementation("com.alibaba:fastjson:1.2.76")
+
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
