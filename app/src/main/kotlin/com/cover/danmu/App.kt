@@ -42,12 +42,12 @@ fun main() {
             )
             danmuList.forEach { item ->
                 val time = item.time
-                val fontSize = 12
+                val fontSize = 25
                 val mode = 0
-                val color = item.style["color"]
-                val date = ""
+                val color =  (item.style["color"]?.toString()?:"000000").toInt(16)
+                val date = System.currentTimeMillis()
                 val poolId = 0
-                val authorId = 0
+                val authorId = item.userName
                 val dbId = 0
                 val content = item.content
                 output.writeText("\t<d p=\"$time,$mode,$fontSize,$color,$date,$poolId,$authorId,$dbId\">$content</d>\n")

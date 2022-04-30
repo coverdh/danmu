@@ -9,6 +9,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.util.*
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -124,12 +125,18 @@ class TencentVideo(
         val ret = mutableListOf<Danmu.DanmuItem>()
         val targetId = getTargetId(ep)
         coroutineScope {
-            while (timeStamp + duration < ep.duration.inWholeSeconds) {
-                val t = timeStamp
-                async {
-                    ret += getDanmuList(targetId, t)
-                }
+            val ts = mutableListOf<Int>()
+            val max = ep.duration.inWholeSeconds - duration
+            while (timeStamp < max) {
+                ts.add(timeStamp)
                 timeStamp += duration
+            }
+            ts.map {
+                async {
+                    getDanmuList(targetId, it)
+                }
+            }.awaitAll().forEach {
+                ret.addAll(it)
             }
         }
         return ret
