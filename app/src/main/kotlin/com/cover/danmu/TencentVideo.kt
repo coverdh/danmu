@@ -156,12 +156,22 @@ class TencentVideo(
             it as JSONObject
             val style = JSON.parseObject(it.getString("content_style"))
             val styleMap = mutableMapOf<String, Any>()
+            var color: Int = -1
+            var position: Int = -1
+            var gradient: Pair<Int, Int>? = null
+            if (it.containsKey("bb_bcolor") && it.getString("bb_bcolor").isNotBlank()) {
+                color = it.getString("bb_bcolor").toInt()
+            }
             if (style != null) {
                 if (style.containsKey("color")) {
-                    styleMap["color"] = style.getString("color")
+                    color = style.getString("color").toInt(16)
+                }
+                if (style.containsKey("gradient_colors")) {
+                    val gradientColors = style.getJSONArray("gradient_colors")
+                    gradient = (gradientColors[0].toString().toInt(16) to gradientColors[1].toString().toInt(16))
                 }
                 if (style.containsKey("position")) {
-                    styleMap["position"] = style.getString("position")
+                    position = style.getString("position").toInt()
                 }
             }
             Danmu.DanmuItem(
@@ -169,7 +179,11 @@ class TencentVideo(
                 time = it.getLong("timepoint"),
                 headUrl = it.getString("headurl"),
                 userName = it.getString("opername"),
-                style = styleMap
+                position = position,
+                style = Danmu.DanmuStyle(
+                    color = color,
+                    gradient = gradient
+                )
             )
         }
     }

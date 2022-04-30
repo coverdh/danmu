@@ -16,6 +16,26 @@ interface Danmu<EP : Danmu.EpisodeInfo> {
         val time: Long,
         val headUrl: String,
         val userName: String,
-        val style: Map<String, Any>
+        val position: Int,
+        val style: DanmuStyle
     )
+
+    data class DanmuStyle(
+        val color: Int,
+        val gradient: Pair<Int, Int>? = null,
+    ) {
+        override fun equals(other: Any?): Boolean {
+            return if (other is DanmuStyle) {
+                gradient == other.gradient && color == other.color
+            } else {
+                false
+            }
+        }
+
+        override fun hashCode(): Int {
+            return color.hashCode() * 32 + gradient.hashCode()
+        }
+    }
+
+
 }
