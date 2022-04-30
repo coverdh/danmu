@@ -9,6 +9,9 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.utils.io.core.*
 import io.ktor.utils.io.streams.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.UUID
@@ -39,58 +42,57 @@ fun main() {
         val moveTime = delay * 1.0f * width
         val oneWordTimeUsed = fontSize * 1.0 * delay
         val spaceCount = 3
-        val lineSlot = mutableMapOf<Int, Slot>()
-        for (line in 0..lineLimit) {
-            lineSlot[line] = Slot()
-        }
-        getDanmuEpList.forEach {
-            val fileName =
-                "Who.Rules.The.World.2022.S01.EP${it.ep.prefixZero(2)}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
-            val danmuList = danmu.getDanmuList(it)
-            val styleMap = mutableMapOf<Danmu.DanmuStyle, ASS.Style>()
-            var lineNumber = 0
-            val eventList = danmuList.sortedBy { it.time }.map {
-                lineNumber++
-                val lastTimeUsed = oneWordTimeUsed * (it.content.length + spaceCount)
-                val showTime = floor(moveTime + lastTimeUsed).toLong()
-                val slot = lineSlot[lineNumber % lineLimit]!!
-                val startTime = slot.tryUse(it.time * 1000, floor(lastTimeUsed).toLong(), showTime)
-                if (startTime != null) {
-                    val style = styleMap.computeIfAbsent(it.style) {
-                        ASS.Style(
-                            name = UUID.randomUUID().toString().replace("-", "").substring(0, 6),
-                            size = fontSize,
-                            font = "PingFang SC",
-                            primaryColor = if (it.color == -1) "FFFFFF".toInt(16) else it.color,
-                            outlineColor = "666666".toInt(16),
-                            outline = 1.0f,
-                            bold = false,
-                            borderStyle = ASS.Style.BorderStyle.BORDER_SHADOW
-                        )
-                    }
-                    ASS.Event(
-                        type = ASS.EventType.Dialogue,
-                        start = startTime,
-                        end = startTime + showTime,
-                        text = it.content.textWrapper(),
-                        name = it.userName.textWrapper(),
-                        style = style.name,
-                        effect = ASS.Effect(
-                            type = ASS.EffectType.Banner,
-                            delay = delay,
-                            leftToRight = false
-                        ),
-                        marginV = height - fontSize * (lineNumber % lineLimit + 2)
-                    )
-                } else {
-                    null
-                }
-            }.filterNotNull()
+        coroutineScope {
+            getDanmuEpList.map {
+                async {
+                    val lineSlot = buildSlots(lineLimit)
+                    val fileName =
+                        "Who.Rules.The.World.2022.S01.EP${it.ep.prefixZero(2)}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
+                    val danmuList = danmu.getDanmuList(it)
+                    val styleMap = mutableMapOf<Danmu.DanmuStyle, ASS.Style>()
+                    var lineNumber = 0
+                    val eventList = danmuList.sortedBy { it.time }.map {
+                        lineNumber++
+                        val lastTimeUsed = oneWordTimeUsed * (it.content.length + spaceCount)
+                        val showTime = floor(moveTime + lastTimeUsed).toLong()
+                        val slot = lineSlot[lineNumber % lineLimit]!!
+                        val startTime = slot.tryUse(it.time * 1000, floor(lastTimeUsed).toLong(), showTime)
+                        if (startTime != null) {
+                            val style = styleMap.computeIfAbsent(it.style) {
+                                ASS.Style(
+                                    name = UUID.randomUUID().toString().replace("-", "").substring(0, 6),
+                                    size = fontSize,
+                                    font = "PingFang SC",
+                                    primaryColor = if (it.color == -1) "FFFFFF".toInt(16) else it.color,
+                                    outlineColor = "666666".toInt(16),
+                                    outline = 1.0f,
+                                    bold = false,
+                                    borderStyle = ASS.Style.BorderStyle.BORDER_SHADOW
+                                )
+                            }
+                            ASS.Event(
+                                type = ASS.EventType.Dialogue,
+                                start = startTime,
+                                end = startTime + showTime,
+                                text = it.content.textWrapper(),
+                                name = it.userName.textWrapper(),
+                                style = style.name,
+                                effect = ASS.Effect(
+                                    type = ASS.EffectType.Banner,
+                                    delay = delay,
+                                    leftToRight = false
+                                ),
+                                marginV = height - fontSize * (lineNumber % lineLimit + 2)
+                            )
+                        } else {
+                            null
+                        }
+                    }.filterNotNull()
 
 
-            val output = File("/Volumes/Data/Video/TV/且试天下/" + fileName).outputStream().asOutput()
-            output.writeText(
-                """
+                    val output = File("/Volumes/Data/Video/TV/且试天下/" + fileName).outputStream().asOutput()
+                    output.writeText(
+                        """
 [Script Info]
 Title: Tencent Video Danmu
 Original Script:  Tencent Video Danmu
@@ -108,13 +110,22 @@ ${styleMap.values.joinToString("\n") { it.toString() }}
 ${ASS.Event.header()}
 ${eventList.joinToString("\n") { it.toEventString() }}
                 """.trimIndent()
-            )
-            output.flush()
-            output.close()
+                    )
+                    output.flush()
+                    output.close()
+                }
+            }.awaitAll()
         }
-
     }
 
+}
+
+private fun buildSlots(lineLimit: Int): MutableMap<Int, Slot> {
+    val lineSlot = mutableMapOf<Int, Slot>()
+    for (line in 0..lineLimit) {
+        lineSlot[line] = Slot()
+    }
+    return lineSlot
 }
 
 val emoji = mapOf(
