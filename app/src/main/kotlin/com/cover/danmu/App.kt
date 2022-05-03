@@ -23,8 +23,8 @@ fun main() {
     val httpClient = HttpClient(CIO)
     val danmu = TencentVideo(httpClient)
     runBlocking {
-        val min = 11
-        val max = 18
+        val min = 21
+        val max = 22
         val episodeList = danmu.getEpisodeList("mzc00200v3lnbmd")
         val getDanmuEpList = episodeList.filter {
             val epIdx = try {
@@ -138,15 +138,16 @@ val emoji = mapOf(
 )
 
 fun String.textWrapper(): String {
-    return this.replace("\n", "\\n").replace(",", "，").replace(Regex("\\[([\\u4e00-\\u9fa5]+)\\]")) {
-
-        if (it.value.length <= 3) {
-            it.value
-        } else {
-            emoji[it.value.substring(1, it.value.length - 1)] ?: emoji[it.value.substring(3, it.value.length - 1)]
-            ?: it.value
-        }
-    }
+    return this.replace("\n", "\\n").replace(",", "，")
+//        .replace(Regex("\\[([\\u4e00-\\u9fa5]+)\\]")) {
+//
+//            if (it.value.length <= 3) {
+//                it.value
+//            } else {
+//                emoji[it.value.substring(1, it.value.length - 1)] ?: emoji[it.value.substring(3, it.value.length - 1)]
+//                ?: it.value
+//            }
+//        }
 }
 
 

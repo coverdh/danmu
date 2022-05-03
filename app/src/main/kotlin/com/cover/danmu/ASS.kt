@@ -112,7 +112,7 @@ object ASS {
     fun Any.prefixZero(size: Int): String {
         var ret = this.toString()
         while (ret.length < size) {
-            ret = "0" + ret
+            ret = "0$ret"
         }
         return ret
     }
