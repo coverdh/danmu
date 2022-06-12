@@ -3,12 +3,25 @@
  */
 package com.cover.danmu
 
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
 class AppTest {
-    @Test fun appHasAGreeting() {
-        val classUnderTest = App()
-        assertNotNull(classUnderTest.greeting, "app should have a greeting")
+    @Test
+    fun iqiyi() {
+        runBlocking {
+            val iqiyi = IQiyi(HttpClient(CIO))
+            iqiyi.getDanmuList(
+                IQiyi.IQiyiEpisodeInfo(
+                    cid = "a_1orhvi4d2bh",
+                    vid = "4060262710163800",
+                    imageUrl = "https://pic4.iqiyipic.com/image/20220427/f9/a4/v_167224937_m_601.jpg",
+
+                    )
+            )
+        }
     }
 }
