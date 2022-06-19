@@ -33,6 +33,8 @@ dependencies {
 
     implementation("com.alibaba:fastjson:1.2.76")
 
+    implementation("org.jsoup:jsoup:1.15.1")
+
     // Use the Kotlin test library.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 

@@ -24,7 +24,7 @@ class TencentVideo(
         val imageUrl: String, // 封面
         val duration: Duration, // 长度
         val title: String, // 标题
-        val ep: String, //  集
+        override val ep: String, //  集
         val trailer: Boolean,//  预告
     ) : Danmu.EpisodeInfo
 

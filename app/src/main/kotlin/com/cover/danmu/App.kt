@@ -15,43 +15,53 @@ import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.UUID
 import kotlin.math.floor
-
+import kotlin.math.max
+import kotlin.math.min
 
 fun main() {
     val httpClient = HttpClient(CIO)
-    val danmu = TencentVideo(httpClient)
     runBlocking {
-        val min = 10
-        val max = 18
-        val episodeList = danmu.getEpisodeList("mzc00200p51jpn7")
-        val getDanmuEpList = episodeList.filter {
-            val epIdx = try {
-                it.ep.toInt()
-            } catch (e: NumberFormatException) {
-                it.ep.filter { it in '0'..'9' }.toString().toInt()
-            }
-            epIdx in min..max
+        // 梦华录
+//        TencentVideo(httpClient).getAndWrite("mzc00200p51jpn7", 25, 26) {
+//            val dir = "/Volumes/Video/TV/A.Dream.of.Splendor"
+//            val file = "A.Dream.of.Splendor.2022.S01.E${it.ep.prefixZero(2)}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
+//            "$dir/$file"
+//        }
+        // 破事精英
+        IQiyi(httpClient).getAndWrite("a_1i8xk54mggd",1,4) {
+            val dir = "/Volumes/Video/TV/The.Lord.of.Losers"
+            val file = "The.Lord.of.Losers.2022.S01.E${it.ep.prefixZero(2)}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
+            "$dir/$file"
         }
-        val fontSize = 55
-        val width = 1920
-        val delay = 5
-        val config = DanmuConfig(
-            5, fontSize * 1.0 * delay, 3, delay * 1.0f * width, 55, delay, 1080, width
-        )
-        coroutineScope {
-            getDanmuEpList.eachRow(5) {
-                it.map {
-                    async {
-                        fetchAndWrite(it, danmu, config) {
-                            "/Volumes/Video/TV/A.Dream.of.Splendor/A.Dream.of.Splendor.2022.S01.E${
-                                it.ep.prefixZero(
-                                    2
-                                )
-                            }.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
-                        }
-                    }
-                }.awaitAll()
-            }
+
+    }
+}
+
+suspend fun <T : Danmu.EpisodeInfo> Danmu<T>.getAndWrite(sid: String, from: Int, to: Int, fileName: (T) -> String) {
+    val min = min(from, to)
+    val max = max(from, to)
+    val episodeList = this.getEpisodeList(sid)
+    val getDanmuEpList = episodeList.filter {
+        val epIdx = try {
+            it.ep.toInt()
+        } catch (e: NumberFormatException) {
+            it.ep.filter { it in '0'..'9' }.toString().toInt()
+        }
+        epIdx in min..max
+    }
+    val fontSize = 55
+    val width = 1920
+    val delay = 5
+    val config = DanmuConfig(
+        5, fontSize * 1.0 * delay, 3, delay * 1.0f * width, 55, delay, 1080, width
+    )
+    coroutineScope {
+        getDanmuEpList.eachRow(5) {
+            it.map {
+                async {
+                    fetchAndWrite(it, this@getAndWrite, config, fileName)
+                }
+            }.awaitAll()
         }
     }
 }
@@ -78,11 +88,11 @@ data class DanmuConfig(
     val width: Int,
 )
 
-private suspend fun fetchAndWrite(
-    ep: TencentVideo.TencentVideoEpisodeInfo,
-    danmu: TencentVideo,
+private suspend fun <T : Danmu.EpisodeInfo> fetchAndWrite(
+    ep: T,
+    danmu: Danmu<T>,
     config: DanmuConfig,
-    fileName: (TencentVideo.TencentVideoEpisodeInfo) -> String
+    fileName: (T) -> String
 ) {
     val lineSlot = buildSlots(config.lineLimit)
 

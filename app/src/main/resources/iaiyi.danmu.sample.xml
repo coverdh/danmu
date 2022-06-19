@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<danmu>
+    <code>A00000</code>
+    <data>
+        <entry>
+            <int>1</int>
+            <list>
+                <bulletInfo>
+                    <contentId>1651319607879001321</contentId>
+                    <content>所以这两个人又在开始表演了</content>
+                    <parentId>0</parentId>
+                    <showTime>300</showTime>
+                    <font>20</font>
+                    <color>ffffff</color>
+                    <opacity>1</opacity>
+                    <position>0</position>
+                    <background>0</background>
+                    <isReply>null</isReply>
+                    <likeCount>0</likeCount>
+                    <plusCount>0</plusCount>
+                    <dissCount>0</dissCount>
+                    <isShowLike>false</isShowLike>
+                    <isShowLikeTest>false</isShowLikeTest>
+                    <userInfo>
+                        <senderAvatar>
+                            https://img7.iqiyipic.com/passport/20210630/91/19/passport_895067833252730_162502770554013_50_50.png
+                        </senderAvatar>
+                        <uid>895067833252730</uid>
+                        <udid>DA25F8CF-4D67-4454-8013-0D6269D54EA1</udid>
+                        <name>咘咘卟卟哇</name>
+                    </userInfo>
+                    <contentType>0</contentType>
+                    <subType>0</subType>
+                    <src>0</src>
+                    <spoiler>false</spoiler>
+                    <halfScreenShow>1</halfScreenShow>
+                    <scoreLevel>1</scoreLevel>
+                    <emotionType>0</emotionType>
+                </bulletInfo>
+            </list>
+        </entry>
+    </data>
+    <sum>51007</sum>
+    <validSum>33617</validSum>
+    <duration>2850</duration>
+    <ts>2022-05-04 21:41:06</ts>
+</danmu>

@@ -8,7 +8,7 @@ interface Danmu<EP : Danmu.EpisodeInfo> {
 
 
     interface EpisodeInfo {
-
+        val ep:String
     }
 
     data class DanmuItem(
