@@ -9,6 +9,7 @@
 plugins {
     // Apply the org.jetbrains.kotlin.jvm Plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.6.20"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 
     // Apply the application plugin to add support for building a CLI application in Java.
     application
@@ -31,6 +32,8 @@ dependencies {
 
     implementation("io.ktor:ktor-client-cio:$ktor_version")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.3")
+
     implementation("com.alibaba:fastjson:1.2.76")
 
     implementation("org.jsoup:jsoup:1.15.1")
@@ -43,7 +46,20 @@ dependencies {
 
 }
 
+tasks.jar {
+    manifest.attributes["Main-Class"] = "com.cover.danmu.AppKt"
+}
+
+
+tasks.shadowJar {
+    manifest {
+        attributes["Main-Class"] = "com.cover.danmu.AppKt"
+    }
+}
+
+
 application {
     // Define the main class for the application.
     mainClass.set("com.cover.danmu.AppKt")
+
 }

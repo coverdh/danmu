@@ -18,20 +18,27 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-fun main() {
+fun main(args: Array<String>) {
     val httpClient = HttpClient(CIO)
     runBlocking {
-        // 梦华录
-//        TencentVideo(httpClient).getAndWrite("mzc00200p51jpn7", 25, 26) {
-//            val dir = "/Volumes/Video/TV/A.Dream.of.Splendor"
-//            val file = "A.Dream.of.Splendor.2022.S01.E${it.ep.prefixZero(2)}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
-//            "$dir/$file"
-//        }
-        // 破事精英
-        IQiyi(httpClient).getAndWrite("a_1i8xk54mggd",1,4) {
-            val dir = "/Volumes/Video/TV/The.Lord.of.Losers"
-            val file = "The.Lord.of.Losers.2022.S01.E${it.ep.prefixZero(2)}.HD1080P.X264.AAC.Mandarin.CHS.BDYS.ass"
-            "$dir/$file"
+        val configFile = args[0]
+        val configMap = mutableMapOf<String, String>()
+        File(configFile).readLines().forEach {
+            val line = it.split("=")
+            configMap[line[0]] = line[1]
+        }
+        val type = configMap["type"] ?: throw RuntimeException("missing type")
+        val sid = configMap["sid"] ?: throw RuntimeException("missing sid")
+        val fileName = configMap["fileName"] ?: throw RuntimeException("missing fileName")
+        val start = configMap["start"] ?: throw RuntimeException("missing start")
+        val end = configMap["end"] ?: throw RuntimeException("missing end")
+
+        when (type) {
+            "aqiyi" -> IQiyi(httpClient)
+            "tencent" -> TencentVideo(httpClient)
+            else -> throw RuntimeException("type not support. type=$type, support types = [aqiyi,tencent].")
+        }.getAndWrite(sid, start.toInt(), end.toInt()) {
+            fileName.format(it.ep.prefixZero(2))
         }
 
     }
