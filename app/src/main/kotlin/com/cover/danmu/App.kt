@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
         val end = configMap["end"] ?: throw RuntimeException("missing end")
 
         when (type) {
-            "aqiyi" -> IQiyi(httpClient)
+            "iqiyi" -> IQiyi(httpClient)
             "tencent" -> TencentVideo(httpClient)
             else -> throw RuntimeException("type not support. type=$type, support types = [aqiyi,tencent].")
         }.getAndWrite(sid, start.toInt(), end.toInt()) {
