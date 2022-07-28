@@ -109,7 +109,7 @@ class TencentVideo(
                             imageUrl = params.getString("image_url"),
                             duration = params.getString("duration").toLong().seconds,
                             title = params.getString("play_title"),
-                            ep = params.getString("title"),
+                            ep = params.getString("c_title_output"),
                             trailer = params.getString("is_trailer") == "1"
                         )
                     )
